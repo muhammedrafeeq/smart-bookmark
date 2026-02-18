@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔖 Smart Bookmark App
 
-## Getting Started
+A sleek, real-time personal bookmark manager. Built with **Next.js**, **Supabase**, and **Tailwind CSS**.
 
-First, run the development server:
+## ✨ Features
+- 🔐 **Google OAuth**: Fast and secure login.
+- ⚡ **Real-time Sync**: Updates across all open tabs instantly without refresh.
+- 🛡️ **Private Data**: Row Level Security (RLS) ensures only you see your bookmarks.
+- 🎨 **Premium UI**: Dark mode with glassmorphism and smooth animations.
+- 📱 **Responsive**: Fully optimized for mobile and desktop.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🛠️ Development Journey: Challenges & Solutions
+
+Building this app presented a few interesting technical hurdles:
+
+### 1. Provider Enablement Error
+**Problem**: Initially, clicking "Sign in with Google" returned localized errors like `Unsupported provider: provider is not enabled`.
+**Solution**: Diagnosed that Supabase requires manual enablement of OAuth providers. I provided detailed documentation on configuring the Google Cloud Console (Client ID/Secret) and properly setting up the Redirect URIs in the Supabase dashboard.
+
+### 2. Real-time Subscription Filtering
+**Problem**: Real-time subscriptions needed to be scoped correctly so users wouldn't receive notifications for other people's bookmarks (even if RLS protected the data).
+**Solution**: Implemented Postgres level filtering in the Supabase subscription:
+```typescript
+.on('postgres_changes', { 
+  event: '*', 
+  schema: 'public', 
+  table: 'bookmarks', 
+  filter: `user_id=eq.${user.id}` 
+}, ...)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prerequisites
+- Node.js installed.
+- A [Supabase](https://supabase.com/) project.
+- A [Google Cloud](https://console.cloud.google.com/) project for OAuth.
 
-## Learn More
+### 2. Supabase Setup
+1. Run the SQL in `supabase_schema.sql` within your Supabase SQL Editor.
+2. Enable the **Google** provider under **Authentication > Providers**.
+3. Enable **Realtime** for the `bookmarks` table (**Database > Replication**).
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Environment Variables
+Create a `.env.local` file with your keys:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Run Locally
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🌐 Deployment
+Deploy easily on **Vercel**:
+1. Push your code to GitHub.
+2. Link the repo in Vercel.
+3. Add the two environment variables in the Vercel dashboard.
+4. Ensure the Vercel URL is added to your Google OAuth Authorized redirect URIs.
